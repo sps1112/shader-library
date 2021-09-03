@@ -44,7 +44,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 timeOffset = vec2(0.0f);
     timeOffset.x = 5.5f * sin(iTime * 2.0f);
     timeOffset.y = -3.5f * iTime;
-    vec2 final=cycle_through(pos + startOffset + timeOffset);
+    vec2 final = cycle_through(pos + startOffset + timeOffset);
     int X = int(final.x);
     int Y = int(final.y);
     

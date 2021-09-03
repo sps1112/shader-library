@@ -2,7 +2,7 @@
 
 // Graph Color Properties
 vec3 bgColor = vec3(0.05f);
-vec3 gridColor = vec3(0.2f, 0.55f, 0.2f);
+vec3 gridColor = vec3(0.25f, 0.75f, 0.25f);
 vec3 eqColor = vec3(0.15f, 0.65f, 0.95f);
 
 // Graph Render Properties
@@ -80,12 +80,12 @@ bool check_point(float pos, float limit, float resolution)
     float width = gridWidth;
     float fracPart = get_frac(pos);
     float intPart = get_int(pos);
-    if(intPart==0.0f)
+    if(intPart == 0.0f)
     {
         width /= 2.0f;
-        if(width<0.02f)
+        if(width < 0.02f)
         {
-            width=0.02f;
+            width = 0.02f;
         }
     }
     if(abs(fracPart) < width)
@@ -93,15 +93,15 @@ bool check_point(float pos, float limit, float resolution)
        float pixelVal = get_pixel(pos, limit, resolution);
        float correctVal = get_int(get_pixel(intPart, limit, resolution));
        float dist = abs(pixelVal - correctVal);
-       float testDist=float(pixelWidth);
-       if(intPart==0.0f)
+       float testDist = float(pixelWidth);
+       if(intPart == 0.0f)
        {
-           // testDist/=2.0f;
-           testDist=get_int(testDist);
+           // testDist /= 2.0f;
+           testDist = get_int(testDist);
        }
-       if(dist<=testDist)
+       if(dist <= testDist)
        {
-           status=true;
+           status = true;
        }
     }
     return status;
