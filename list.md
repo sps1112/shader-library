@@ -1,0 +1,53 @@
+## List
+
+Contains list of common shaders that can be implemented.
+
+- [X] Grayscale
+- [X] Checkbox Pattern
+- [X] Graph Shader
+- [X] 2D Renderer
+- [ ] Perlin Noise Map
+- [ ] 3D Scene Shader
+- [ ] Planet Shader
+- [ ] Flame Shader
+- [ ] Jumping/Dashing Ball
+- [ ] Atom Shader
+- [ ] Cloud Shader
+- [ ] Gravity Simulation
+- [ ] DNA Shader
+- [ ] Wood Shader
+- [ ] Water Shader
+- [ ] Force Field Shader
+- [ ] Grass Shader + Winds
+- [ ] Avatar 4 Elements
+- [ ] Nebula Shader
+- [ ] Fluid Simulation 
+- [ ] Water Fountain Shader
+- [ ] Animal Cell Tissue
+- [ ] Waving Flag
+- [ ] Black Hole Shader
+- [ ] Screen Transition Shader
+- [ ] Infinite Fractal Shader
+- [ ] Projection into Image
+- [ ] Blur Shader
+- [ ] Toon Shader
+- [ ] Outline Shader
+- [ ] TV Static Screen
+- [ ] Hologram Shader
+- [ ] Endless Tunnel Shader
+- [ ] Shadow Shader
+- [ ] Growing Plant
+- [ ] Terrain Traversal
+- [ ] Magma Shader
+- [ ] Tesseletion Shader
+- [ ] Psychedelic Simulation
+- [ ] Audio Visualizer
+- [ ] Raymarching Blending Shapes
+- [ ] Mandlebrot Shader
+- [ ] Plasma Shader
+- [ ] Scrolling Green Text Shader
+- [ ] Bonfire Shader
+- [ ] Sand Dunes Shader
+- [ ] Dust Light Rays Shader
+- [ ] Procedural Brick Wall
+- [ ] Raycast Room
