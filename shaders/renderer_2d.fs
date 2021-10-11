@@ -92,35 +92,14 @@ int get_closest_point(vec2 A, vec2 B, vec2 C, vec2 X)
 // Returns the Minimum of A, B and C
 float get_min(float A, float B, float C)
 {
-    if(A <= B && A <= C)
-    {
-        return A;
-    }
-    else if(B <= A && B <= C)
-    {
-        return B;
-    }
-    else
-    {
-        return C;
-    }
+    return min(min(A, B), C);
 }
+
 
 // Returns the Maximum of A, B and C
 float get_max(float A, float B, float C)
 {
-    if(A >= B && A >= C)
-    {
-        return A;
-    }
-    else if(B >= A && B >= C)
-    {
-        return B;
-    }
-    else
-    {
-        return C;
-    }
+    return max(max(A, B), C);
 }
 
 // Cycles the value of a in the cycle [minVal, maxVal]

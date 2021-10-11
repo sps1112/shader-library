@@ -1,8 +1,9 @@
-#define AREA_GRAPH 1
+#define AREA_GRAPH 0
 
 // Graph Color Properties
 vec3 bgColor = vec3(0.05f);
 vec3 gridColor = vec3(0.25f, 0.75f, 0.25f);
+vec3 axesColor = vec3(0.9f, 0.9f, 0.1f);
 vec3 eqColor = vec3(0.15f, 0.65f, 0.95f);
 
 // Graph Render Properties
@@ -10,15 +11,16 @@ float yLimit = 6.0f;
 float gridWidth = 0.2f;
 int pixelWidth = 2;
 
-// Equarion Properties
-float errorMargin = 0.2f;
+// Equation Properties
+float errorMargin = 0.25f;
 
 // Gets f(x, y)
 float get_result(vec2 point)
 {
-    float radius = 25.0f * ((sin(iTime * 1.5f) + 1.0f) / 2.0f) + 0.05f;
+    //float radius = 25.0f * ((sin(iTime * 1.5f) + 1.0f) / 2.0f) + 0.05f;
     // f(x,y) = y^2 + x^2 - R
-    float res = ((point.y * point.y) + (point.x * point.x) - radius);
+    //float res = ((point.y * point.y) + (point.x * point.x) - radius);
+    float res = point.y - sin(abs(point.x)) * sqrt(abs(point.x)) * cos(iTime * 3.0f) * 2.0f;
     return res;
 }
 
@@ -134,6 +136,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     if(check_point(pos.x, xLimit , iResolution.x) || check_point(pos.y, yLimit, iResolution.y))
     {
         col = gridColor;
+        if((check_point(pos.x, xLimit , iResolution.x) && get_int(pos.x) == 0.0f) || 
+            (check_point(pos.y, yLimit , iResolution.y) && get_int(pos.y) == 0.0f))
+        {
+            col = axesColor;
+        }
     }
     
     // c. If the point satisfies the Equation, then change color
