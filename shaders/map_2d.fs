@@ -14,6 +14,12 @@ vec2 get_uv(vec2 fragCoord)
     return uv;
 }
 
+// Inverse Lerp Function
+float linear_step(float l, float u, float a)
+{
+    return ((a - l) / (u - l));
+}
+
 //----------------------------------------------------
 //----------------------------------------------------
 
@@ -117,12 +123,14 @@ float noise(float x, float y, float z)
 // NOISE_GENERATOR
 //----------------------------------------------------
 #define NOISE_FUNCTION get_octave_noise
+#define SMOOTH_IL 1
 #define SCALE_FROM_CENTER 1
 #define LEVEL_OF_DETAIL 0
-#define NOISE_SCALE 50
+#define NOISE_SCALE 20
 #define NUMBER_OCTAVES 4
 #define PERSISTANCE 0.5f
 #define LACUNARITY 2.0f
+#define NORMALIZE_OFFSET 0
 #define FALLOFF_CURVE 5
 #define FALLOFF_SHIFT 10
 
@@ -133,7 +141,7 @@ float rand(vec2 pos)
 }
 
 // Gets the Random Noise Height
-float get_noise(vec2 pos)
+float get_noise(vec2 pos,float time)
 {
     pos *= float(TEXTURE_ROWS);
 #if LEVEL_OF_DETAIL
@@ -151,7 +159,7 @@ float perlin(vec2 pos)
 }
 
 // Gets the scaled perlin noise for point
-float get_perlin_noise(vec2 pos)
+float get_perlin_noise(vec2 pos, float time)
 {
     float rows = float(TEXTURE_ROWS);
     float columns = rows * (iResolution.x / iResolution.y);
@@ -159,7 +167,7 @@ float get_perlin_noise(vec2 pos)
     float scale = float(NOISE_SCALE);
     if(scale <= 0.0f)
     {
-        scale += 0.001f;
+        scale = 0.001f;
     }
     
     float halfX = 0.0f;
@@ -178,7 +186,7 @@ float get_perlin_noise(vec2 pos)
 }
 
 // Gets the scaled octave noise for point
-float get_octave_noise(vec2 pos)
+float get_octave_noise(vec2 pos, float timeRate)
 {
     float rows = float(TEXTURE_ROWS);
     pos *= rows;
@@ -220,19 +228,28 @@ float get_octave_noise(vec2 pos)
     pos /= float(LEVEL_OF_DETAIL);
 #endif
 
-    vec2 offset = 1.05f * vec2(iTime * 1.25f, iTime * 1.25f);
-    scale += sin(iTime * 0.85f) * 5.25f;
+    vec2 offset = timeRate * vec2(iTime * 1.25f, iTime * 1.25f);
+    scale += sin(iTime * 0.85f) * 0.0f;
     
     for (int i = 0; i < octaves; i++)
     {
+#if NORMALIZE_OFFSET
         float sampleX = (((pos.x-halfX) / scale) * frequency) + offset.x + offsets[i*2];
         float sampleY = (((pos.y-halfY) / scale) * frequency) + offset.y + offsets[(i*2)+1];
-        float noise = (get_perlin_noise(vec2(sampleX, sampleY)) * 2.0f) - 1.0f;
+#else
+        float sampleX = (((pos.x-halfX + offset.x*scale) / scale) * frequency)  + offsets[i*2];
+        float sampleY = (((pos.y-halfY + offset.y*scale) / scale) * frequency)  + offsets[(i*2)+1];
+#endif
+        float noise = (perlin(vec2(sampleX, sampleY)) * 2.0f) - 1.0f;
         noiseVal += noise * amplitude;
         amplitude *= persistence;
         frequency *= lacunarity;
-    }   
+    }     
+#if SMOOTH_IL
     noiseVal = smoothstep(-0.95f, 1.1f, noiseVal);
+#else
+    noiseVal = linear_step(-0.7f,0.85f,noiseVal);
+#endif
     return noiseVal;
 }
 
@@ -246,12 +263,23 @@ float eval_curve(float val)
 }
 
 // Returns the falloff map for map
-float falloff(vec2 pos)
+float falloff(vec2 pos,float time)
 {
     pos.x /= (iResolution.x / iResolution.y);
     pos = pos * 2.0f - 1.0f;
     float val = max(abs(pos.x), abs(pos.y));
     return clamp(eval_curve(val), 0.0f, 1.0f);
+}
+
+// Gets a Cloud Map
+float cloud_map(vec2 pos)
+{
+    vec2 offset=vec2(500.0f);
+    //offset+=vec2(iTime*0.0f);
+    float h = get_octave_noise(pos+offset,1.25f);
+    float th=0.75f;
+    h=(h<th)?0.0f:h;
+    return h;
 }
 //----------------------------------------------------
 //----------------------------------------------------
@@ -260,6 +288,10 @@ float falloff(vec2 pos)
 //----------------------------------------------------
 // MAP_SETTINGS
 //----------------------------------------------------
+#define BLEND_REGIONS 1
+#define MIX_FACTOR 0.7f
+#define MIX_THRESHOLD 0.85f
+#define CLOUD_BLEND 0.65f
 
 // Color for all regions
 vec3[8] regions = vec3[8](
@@ -270,12 +302,12 @@ vec3(0.2f, 0.8f, 0.2f), // LIGHT GREEN
 vec3(0.2f, 0.60f, 0.2f), // DARK GREEN
 vec3(0.6f, 0.35f, 0.1f), // LIGHT BROWN
 vec3(0.25f, 0.1f, 0.05f), // DARK BROWN
-vec3(0.85f, 0.95f, 1.0f) // SNOW BLUE
+vec3(0.85f, 0.85f, 1.0f) // SNOW BLUE
 );
 
 // Start height for all regions
 float[8] heights = float[8](
-0.0f, // DEEP OCEAN
+0.00f, // DEEP OCEAN
 0.025f, // OCEAN
 0.35f, // COAST
 0.365f, // PLAINS
@@ -284,15 +316,6 @@ float[8] heights = float[8](
 0.82f, // MOUNTAINS
 0.93f // SNOW
 );
-
-// Gets the Height val for the pixel
-float get_height(vec2 uv)
-{
-   float height = NOISE_FUNCTION(uv);
-   float diff = falloff(uv);
-   height = clamp(height-diff, 0.0f, 1.0f);
-   return height;
-}
 
 // Gets the index of the region height lies in
 int get_region_index(float h)
@@ -311,13 +334,55 @@ int get_region_index(float h)
     }
     return index;
 }
+
+vec3 get_color(vec2 uv)
+{
+    // Get Height
+    float h= NOISE_FUNCTION(uv,0.55f);
+    bool insideMap=true;
+    // Apply Falloff
+    float diff = falloff(uv,0.0f);
+    if(h-diff<0.0f)
+    {
+        insideMap=false;
+    }
+    h = clamp(h-diff, 0.0f, 1.0f);
+    
+    // Get Color from Region
+    int index = get_region_index(h);
+    vec3 col = regions[index];
+    
+    // Blend Region Colors
+#if BLEND_REGIONS
+    float h2 = ((index+1)<8?heights[index+1]:1.0f);
+    float off = linear_step(heights[index],h2,h);
+    //off=smoothstep(heights[index],h2,h);
+    if(off>=MIX_THRESHOLD)
+    {
+        col = mix(col, mix(col, regions[index+1], off), MIX_FACTOR);
+    }
+#endif
+    
+    // Apply Cloud Cover
+    if(insideMap)
+    {
+        float cH=cloud_map(uv);
+        vec3 cloud = vec3(cH);
+        if(cH>0.0f)
+        {
+            col = (cloud*CLOUD_BLEND)+col*(1.0f-CLOUD_BLEND);
+        }
+    }
+    return col;
+}
 //----------------------------------------------------
 //----------------------------------------------------
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     vec2 uv = fragCoord/iResolution.y;
-    vec3 col = regions[get_region_index(get_height(uv))];
+    vec3 col = get_color(uv);
+    
 #if GAMMA_CORRECTION
     col = pow(col, vec3(1.0f / 2.2f));
 #endif
