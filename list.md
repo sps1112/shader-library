@@ -6,17 +6,17 @@ Contains list of common shaders that can be implemented.
 - [X] Checkbox Pattern
 - [X] Graph Shader
 - [X] 2D Renderer
-- [ ] Perlin Noise Map
+- [X] Perlin Noise Map
 - [ ] 3D Scene Shader
 - [ ] Planet Shader
-- [ ] Flame Shader
+- [X] Flame Shader
 - [ ] Jumping/Dashing Ball
 - [ ] Atom Shader
 - [ ] Cloud Shader
 - [ ] Gravity Simulation
 - [ ] DNA Shader
 - [ ] Wood Shader
-- [ ] Water Shader
+- [X] Water Shader
 - [ ] Force Field Shader
 - [ ] Grass Shader + Winds
 - [ ] Avatar 4 Elements
