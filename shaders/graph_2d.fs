@@ -20,7 +20,8 @@ float get_result(vec2 point)
     //float radius = 25.0f * ((sin(iTime * 1.5f) + 1.0f) / 2.0f) + 0.05f;
     // f(x,y) = y^2 + x^2 - R
     //float res = ((point.y * point.y) + (point.x * point.x) - radius);
-    float res = point.y - sin(abs(point.x)) * sqrt(abs(point.x)) * cos(iTime * 3.0f) * 2.0f;
+    float phase=sin(iTime*3.0f)*5.0f;
+    float res = point.y - sin(abs(point.x+phase)) * sqrt(abs(point.x)) * cos(iTime * 3.0f) * 2.0f;
     return res;
 }
 
