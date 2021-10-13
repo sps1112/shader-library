@@ -288,10 +288,6 @@ float cloud_map(vec2 pos)
 //----------------------------------------------------
 // MAP_SETTINGS
 //----------------------------------------------------
-#define BLEND_REGIONS 1
-#define MIX_FACTOR 0.7f
-#define MIX_THRESHOLD 0.85f
-#define CLOUD_BLEND 0.65f
 
 // Color for all regions
 vec3[8] regions = vec3[8](
@@ -334,12 +330,65 @@ int get_region_index(float h)
     }
     return index;
 }
+//----------------------------------------------------
+//----------------------------------------------------
+#define APPLY_FALLOFF 1
+#define COLOR_MAP 1
+
+#define BLEND_REGIONS 1
+#define MIX_FACTOR 0.65f
+#define MIX_THRESHOLD 0.85f
+
+#define DRAW_CLOUDS 1
+#define CLOUD_BLEND 0.75f
+
+#define ENABLE_LIGHT 1
+#define LIGHT_ANGLE 240.0f
+#define LIGHT_ELEVATION_ANGLE 30.0f
+#define LIGHT_CHECK 0.015f
+#define LIGHT_INTENSITY 5.0f
 
 vec3 get_color(vec2 uv)
 {
-    // Get Height
-    float h= NOISE_FUNCTION(uv,0.55f);
     bool insideMap=true;
+    float timeFac=0.85f;
+    vec3 shadowMap=vec3(1.0f);
+    bool applyShadow=false;
+    
+    // Get Height
+    float h= NOISE_FUNCTION(uv,timeFac);
+    vec3 col=vec3(h);
+    
+#if ENABLE_LIGHT
+    vec2 lightDir=vec2(1.0f,0.0f);
+    float theta=float(LIGHT_ANGLE+iTime*45.0f)*(3.1416f/180.0f);
+    mat2 rot=mat2(cos(theta), -sin(theta),
+                  sin(theta), cos(theta));
+    lightDir=normalize(lightDir*rot);
+    
+    float checkDist=float(LIGHT_CHECK);
+    float hP=NOISE_FUNCTION(uv-lightDir*checkDist,timeFac);
+    
+    float xDiff=checkDist;
+    float yDiff=(hP-h);
+    float delH=tan(LIGHT_ELEVATION_ANGLE*(3.1416f/180.0f))*xDiff;
+    
+    if(insideMap)
+    {
+        if(yDiff<delH)
+        {
+            yDiff=0.0f;
+        }
+        yDiff=1.0f-yDiff;
+        if(yDiff>=0.0f)
+        {
+            yDiff=pow(yDiff,LIGHT_INTENSITY);
+        }
+        shadowMap=vec3(yDiff);
+    }
+#endif
+    
+#if APPLY_FALLOFF 
     // Apply Falloff
     float diff = falloff(uv,0.0f);
     if(h-diff<0.0f)
@@ -347,16 +396,24 @@ vec3 get_color(vec2 uv)
         insideMap=false;
     }
     h = clamp(h-diff, 0.0f, 1.0f);
-    
+    col=vec3(h);
+#endif
+
+#if COLOR_MAP
     // Get Color from Region
     int index = get_region_index(h);
-    vec3 col = regions[index];
-    
+    col = regions[index];
+#endif
+
     // Blend Region Colors
 #if BLEND_REGIONS
     float h2 = ((index+1)<8?heights[index+1]:1.0f);
     float off = linear_step(heights[index],h2,h);
     //off=smoothstep(heights[index],h2,h);
+    if(off>=MIX_THRESHOLD/2.0f)
+    {
+       applyShadow=true;
+    }
     if(off>=MIX_THRESHOLD)
     {
         col = mix(col, mix(col, regions[index+1], off), MIX_FACTOR);
@@ -364,6 +421,7 @@ vec3 get_color(vec2 uv)
 #endif
     
     // Apply Cloud Cover
+#if DRAW_CLOUDS
     if(insideMap)
     {
         float cH=cloud_map(uv);
@@ -373,6 +431,13 @@ vec3 get_color(vec2 uv)
             col = (cloud*CLOUD_BLEND)+col*(1.0f-CLOUD_BLEND);
         }
     }
+#endif
+
+    if(insideMap && index>2 && applyShadow)
+    {
+        col*=shadowMap;
+    }
+    
     return col;
 }
 //----------------------------------------------------
