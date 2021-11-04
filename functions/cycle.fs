@@ -1,3 +1,4 @@
+//----------------------------------------------------
 // Cycles the value of a in the cycle [minVal, maxVal]
 float cycle_float(float a, float minVal, float maxVal)
 {
@@ -16,3 +17,4 @@ float cycle_float(float a, float minVal, float maxVal)
     }
     return a;
 }
+//----------------------------------------------------

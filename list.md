@@ -51,3 +51,4 @@ Contains list of common shaders that can be implemented.
 - [ ] Dust Light Rays Shader
 - [ ] Procedural Brick Wall
 - [ ] Raycast Room
+- [X] Brick Shader

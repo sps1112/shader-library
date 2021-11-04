@@ -190,3 +190,4 @@ float get_fractal_height(vec2 pos)
     h = pow(h,SHARPNESS);
     return h;
 }
+//----------------------------------------------------

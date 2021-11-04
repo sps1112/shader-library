@@ -1,4 +1,4 @@
-float yScale = 1.0;
+float yScale = 1.0f;
 
 vec2 get_uv(vec2 fragCoord)
 {

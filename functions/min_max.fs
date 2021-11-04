@@ -1,3 +1,4 @@
+//----------------------------------------------------
 // Returns the Minimum of A, B and C
 float get_min(float A, float B, float C)
 {
@@ -9,3 +10,4 @@ float get_max(float A, float B, float C)
 {
     return max(max(A, B), C);
 }
+//----------------------------------------------------

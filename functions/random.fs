@@ -1,3 +1,4 @@
+//----------------------------------------------------
 // Generates a random noise between 0.0 and 1.0
 float rand(vec2 pos)
 {   
