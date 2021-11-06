@@ -1,12 +1,12 @@
 // TEXTURE SETTINGS
 //------------------------------
-vec3 brickColA=vec3(0.3f,0.3f,0.5f);
-vec3 brickColB=vec3(0.1f,0.1f,0.1f);
+vec3 brickColA=vec3(0.35f,0.35f,0.45f);
+vec3 brickColB=vec3(0.05f,0.05f,0.05f);
 vec3 borderCol=vec3(0.2f,0.1f,0.0f);
 
 float scale=1.5f;
-float rows=6.0f;
-vec2 widthRange=vec2(0.05f,0.4f);
+float rows=4.0f;
+vec2 widthRange=vec2(0.1f,0.4f);
 float borderWidth=0.005f;
 
 // Generates a random noise between 0.0 and 1.0
@@ -87,6 +87,7 @@ vec3 get_texture_col(vec2 p)
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     vec2 uv=fragCoord/iResolution.xy;
+    scale*=1.0f+ sin(iTime)*sin(iTime)*0.5f;
     uv*=scale;
 
     vec3 col = get_texture_col(uv);

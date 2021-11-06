@@ -15,7 +15,8 @@ Contains list of common shaders that can be implemented.
 - [ ] Cloud Shader
 - [ ] Gravity Simulation
 - [ ] DNA Shader
-- [ ] Wood Shader
+- [X] Wood Shader
+- [X] Marble Shader
 - [X] Water Shader
 - [ ] Force Field Shader
 - [ ] Grass Shader + Winds
@@ -49,6 +50,5 @@ Contains list of common shaders that can be implemented.
 - [ ] Bonfire Shader
 - [ ] Sand Dunes Shader
 - [ ] Dust Light Rays Shader
-- [ ] Procedural Brick Wall
+- [X] Procedural Brick Wall
 - [ ] Raycast Room
-- [X] Brick Shader
