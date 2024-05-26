@@ -88,13 +88,12 @@ float noise(float x, float y, float z)
         w);
     return (res + 1.0f) / 2.0f;
 }
-
 //----------------------------------------------------
 //----------------------------------------------------
 
 
 //----------------------------------------------------
-// FRACTAL_NOISE_GENERATOR
+// OCTAVE_NOISE_GENERATOR
 //----------------------------------------------------
 #define IMAGE_ROWS 50
 #define SCALE 17.5f
@@ -104,7 +103,7 @@ float noise(float x, float y, float z)
 #define OCTAVES 4
 #define PERSISTANCE 0.5f
 #define LACUNARITY 2.0f
-#define NORMALIZE_OFFSET 1
+#define NORMALIZE_OFFSET 0
 
 // Inverse Lerp Function
 float linear_step(float l, float u, float a)
@@ -118,7 +117,7 @@ float perlin(vec2 pos)
     return noise(pos.x, pos.y, 0.0f);
 }
 
-float get_fractal_noise(vec2 pos)
+float get_octave_noise(vec2 pos)
 {
     float rows = float(IMAGE_ROWS);
     pos *= rows;
@@ -151,10 +150,7 @@ float get_fractal_noise(vec2 pos)
     pos *= float(LEVEL_OF_DETAIL);
 #endif
 
-    vec2 offset = 0.2f * vec2(iTime * 1.25f, iTime * 1.25f);
-    vec2 shift=vec2(45.0f);
-    mat2 rot = mat2(cos(1.5), sin(1.5),
-                    -sin(1.5), cos(1.5));
+    vec2 offset = 0.1f * vec2(iTime * 1.25f, iTime * 1.25f);
     
     for (int i = 0; i < octaves; i++)
     {
@@ -166,28 +162,49 @@ float get_fractal_noise(vec2 pos)
         float sampleY = (((pos.y-halfY + offset.y*scale) / scale) * frequency);
 #endif
         float noise = (perlin(vec2(sampleX, sampleY)) * 2.0f) - 1.0f;
-        noiseVal += abs(noise) * amplitude;
+        noiseVal += noise * amplitude;
         // Decrease A and increase F
         amplitude *= persistence;
         frequency *= lacunarity;
-        pos=pos*rot+shift;
-    }
+    }    
 
     // Inverser lerp so that noiseval lies between 0 and 1 
-    noiseVal=linear_step(0.0f,1.5f,noiseVal);
+#if SMOOTH_INVERSE_LERP
+    noiseVal = smoothstep(-0.95f, 1.1f, noiseVal);
+#else
+    noiseVal = linear_step(-0.7f,0.85f,noiseVal);
+#endif
     return noiseVal;
 }
 //----------------------------------------------------
 //----------------------------------------------------
+vec3 baseCol=vec3(0.25f,0.25f,0.2f);
+vec3 detailCol=vec3(0.9f,0.9f,1.0f);
 
-#define SHARPNESS 5.5f
-#define OFFSET 1.0f
+float xScale=3.0f;
+float yScale=3.0f;
 
-float get_fractal_height(vec2 pos)
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-    float h=get_fractal_noise(pos);
-    h = OFFSET-h;
-    h = pow(h,SHARPNESS);
-    return h;
+    vec2 uv=fragCoord/iResolution.y;
+    uv*=xScale*yScale;
+    
+    float fac=8.0f;
+    float freq=1.5f;
+    float t=get_octave_noise(freq*uv/(xScale*yScale));
+    
+    float p=uv.x*xScale+uv.y*yScale;
+    p+=t*fac;
+    float h=sin(p);
+    
+    h=h*h;
+    h=1.0f-h;
+    h+=0.2f;
+    h=pow(h,2.0f);
+    h=smoothstep(h,-1.0f,-0.2f);
+    
+    vec3 col=mix(baseCol,detailCol*h,h);
+    
+    // Output to screen
+    fragColor = vec4(col,1.0);
 }
-//----------------------------------------------------
